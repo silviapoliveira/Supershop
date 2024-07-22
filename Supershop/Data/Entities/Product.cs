@@ -1,5 +1,4 @@
 ﻿using System;
-using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
 namespace Supershop.Data.Entities
@@ -15,7 +14,7 @@ namespace Supershop.Data.Entities
         [DisplayFormat(DataFormatString = "{0:C2}", ApplyFormatInEditMode = false)]
         public decimal Price { get; set; }
 
-        [Display(Name= "Image")]
+        [Display(Name = "Image")]
         public string ImageUrl { get; set; }
 
         [Display(Name = "Last Purchase")]
