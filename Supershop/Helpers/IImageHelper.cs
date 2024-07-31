@@ -5,6 +5,6 @@ namespace Supershop.Helpers
 {
     public interface IImageHelper
     {
-        Task<string> UploadImageAsync(IFormFile imageFile, string folder);
+        Task<string> UpdloadImageAsync(IFormFile imageFile, string folder);
     }
 }

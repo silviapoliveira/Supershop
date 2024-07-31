@@ -7,7 +7,7 @@ namespace Supershop.Helpers
 {
     public class ImageHelper : IImageHelper
     {
-        public async Task<string> UploadImageAsync(IFormFile imageFile, string folder)
+        public async Task<string> UpdloadImageAsync(IFormFile imageFile, string folder)
         {
             string guid = Guid.NewGuid().ToString();
             string file = $"{guid}.jpg";
