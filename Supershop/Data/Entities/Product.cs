@@ -37,7 +37,7 @@ namespace Supershop.Data.Entities
             {
                 if (string.IsNullOrEmpty(ImageUrl))
                 {
-                    return null;
+                    return "https://localhost:44361/images/products/noimage.jpg";
                 }
 
                 return $"https://localhost:44361{ImageUrl.Substring(1)}";

@@ -17,8 +17,4 @@
     <PackageReference Include="WindowsAzure.Storage" Version="5.0.2" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="wwwroot\images\products\" />
-  </ItemGroup>
-
 </Project>
