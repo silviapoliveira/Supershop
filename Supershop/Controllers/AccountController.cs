@@ -1,25 +1,33 @@
-﻿using System.Linq;
+﻿using System;
+using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
+using System.Security.Claims;
+using System.Text;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
+using Supershop.Data;
 using Supershop.Data.Entities;
 using Supershop.Helpers;
 using Supershop.Models;
-using System.Threading;
-using Supershop.Data;
 
 namespace Supershop.Controllers
 {
     public class AccountController : Controller
     {
         private readonly IUserHelper _userHelper;
+        private readonly IConfiguration _configuration;
         private readonly ICountryRepository _countryRepository;
 
         public AccountController(
             IUserHelper userHelper,
+            IConfiguration configuration,
             ICountryRepository countryRepository)
         {
             _userHelper = userHelper;
+            _configuration = configuration;
             _countryRepository = countryRepository;
         }
 
@@ -41,7 +49,7 @@ namespace Supershop.Controllers
                 var result = await _userHelper.LoginAsync(model);
                 if (result.Succeeded)
                 {
-                    if(this.Request.Query.Keys.Contains("ReturnUrl"))
+                    if (this.Request.Query.Keys.Contains("ReturnUrl"))
                     {
                         return Redirect(this.Request.Query["ReturnUrl"].First());
                     }
@@ -74,11 +82,11 @@ namespace Supershop.Controllers
         [HttpPost]
         public async Task<IActionResult> Register(RegisterNewUserViewModel model)
         {
-            if(ModelState.IsValid)
+            if (ModelState.IsValid)
             {
                 var user = await _userHelper.GetUserByEmailAsync(model.Username);
 
-                if(user == null)
+                if (user == null)
                 {
                     var city = await _countryRepository.GetCityAsync(model.CityId);
 
@@ -95,7 +103,7 @@ namespace Supershop.Controllers
                     };
 
                     var result = await _userHelper.AddUserAsync(user, model.Password);
-                    if(result != IdentityResult.Success)
+                    if (result != IdentityResult.Success)
                     {
                         ModelState.AddModelError(string.Empty, "The user couldn't be created.");
                         return View(model);
@@ -108,7 +116,7 @@ namespace Supershop.Controllers
                         Username = model.Username
                     };
 
-                    var result2= await _userHelper.LoginAsync(loginViewModel);
+                    var result2 = await _userHelper.LoginAsync(loginViewModel);
                     if (result2.Succeeded)
                     {
                         return RedirectToAction("Index", "Home");
@@ -124,7 +132,7 @@ namespace Supershop.Controllers
         {
             var user = await _userHelper.GetUserByEmailAsync(this.User.Identity.Name);
             var model = new ChangeUserViewModel();
-            if(user != null)
+            if (user != null)
             {
                 model.FirstName = user.FirstName;
                 model.LastName = user.LastName;
@@ -132,10 +140,10 @@ namespace Supershop.Controllers
                 model.PhoneNumber = user.PhoneNumber;
 
                 var city = await _countryRepository.GetCityAsync(user.CityId);
-                if(city != null)
+                if (city != null)
                 {
                     var country = await _countryRepository.GetCountryAsync(city);
-                    if(country != null)
+                    if (country != null)
                     {
                         model.CountryId = country.Id;
                         model.Cities = _countryRepository.GetComboCities(country.Id);
@@ -154,7 +162,7 @@ namespace Supershop.Controllers
         [HttpPost]
         public async Task<IActionResult> ChangeUser(ChangeUserViewModel model)
         {
-            if(ModelState.IsValid)
+            if (ModelState.IsValid)
             {
                 var user = await _userHelper.GetUserByEmailAsync(this.User.Identity.Name);
                 if (user != null)
@@ -172,7 +180,8 @@ namespace Supershop.Controllers
                     if (response.Succeeded)
                     {
                         ViewBag.UserMessage = "User updated!";
-                    } else
+                    }
+                    else
                     {
                         ModelState.AddModelError(string.Empty, response.Errors.FirstOrDefault().Description);
                     }
@@ -198,16 +207,60 @@ namespace Supershop.Controllers
                     if (result.Succeeded)
                     {
                         return RedirectToAction("ChangeUser");
-                    } else
+                    }
+                    else
                     {
                         ModelState.AddModelError(string.Empty, result.Errors.FirstOrDefault().Description);
                     }
-                } else
+                }
+                else
                 {
                     ModelState.AddModelError(string.Empty, "User not found.");
                 }
             }
             return View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateToken([FromBody] LoginViewModel model)
+        {
+            if (this.ModelState.IsValid)
+            {
+                var user = await _userHelper.GetUserByEmailAsync(model.Username);
+                if (user != null)
+                {
+                    var result = await _userHelper.ValidatePasswordAsync(
+                        user,
+                        model.Password);
+
+                    if (result.Succeeded)
+                    {
+                        var claims = new[]
+                        {
+                            new Claim(JwtRegisteredClaimNames.Sub, user.Email),
+                            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+                        };
+
+                        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Tokens:Key"]));
+                        var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+                        var token = new JwtSecurityToken(
+                            _configuration["Tokens:Issuer"],
+                            _configuration["Tokens:Audience"],
+                            claims,
+                            expires: DateTime.UtcNow.AddDays(15),
+                            signingCredentials: credentials);
+                        var results = new
+                        {
+                            token = new JwtSecurityTokenHandler().WriteToken(token),
+                            expiration = token.ValidTo
+                        };
+
+                        return this.Created(string.Empty, results);
+                    }
+                }
+            }
+
+            return BadRequest();
         }
 
         public IActionResult NotAuthorized()
