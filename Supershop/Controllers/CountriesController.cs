@@ -3,7 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 using Supershop.Data;
 using Supershop.Data.Entities;
 using Supershop.Models;
+using System;
 using System.Threading.Tasks;
+using Vereyon.Web;
 
 namespace Supershop.Controllers
 {
@@ -11,10 +13,14 @@ namespace Supershop.Controllers
     public class CountriesController : Controller
     {
         private readonly ICountryRepository _countryRepository;
+        private readonly IFlashMessage _flashMessage;
 
-        public CountriesController(ICountryRepository countryRepository)
+        public CountriesController
+            (ICountryRepository countryRepository,
+            IFlashMessage flashMessage)
         {
             _countryRepository = countryRepository;
+            _flashMessage = flashMessage;
         }
 
         public IActionResult Index()
@@ -125,11 +131,20 @@ namespace Supershop.Controllers
         {
             if (ModelState.IsValid)
             {
-                await _countryRepository.CreateAsync(country);
-                return RedirectToAction(nameof(Index));
+                try
+                {
+                    await _countryRepository.CreateAsync(country);
+                    return RedirectToAction(nameof(Index));
+                }
+                catch (Exception ex)
+                {
+                    _flashMessage.Danger("This country already exists.");
+                }
+
+                return View(country);
             }
 
-            return View();
+            return View(country);
         }
 
         public async Task<IActionResult> Edit(int? id)
