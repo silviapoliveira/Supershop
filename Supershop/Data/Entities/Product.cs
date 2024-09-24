@@ -37,10 +37,10 @@ namespace Supershop.Data.Entities
             {
                 if (string.IsNullOrEmpty(ImageUrl))
                 {
-                    return "https://localhost:44361/images/products/noimage.jpg";
+                    return "https://lnhhn0nt-44361.uks1.devtunnels.ms/images/products/noimage.jpg";
                 }
 
-                return $"https://localhost:44361{ImageUrl.Substring(1)}";
+                return $"https://lnhhn0nt-44361.uks1.devtunnels.ms/{ImageUrl.Substring(1)}";
             }
         }
     }
