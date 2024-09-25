@@ -25,16 +25,24 @@ namespace Supershop.Prism.Helpers
 
         public static string Error => Resource.Error;
 
+        public static string IsAvailable => Resource.IsAvailable;
+
         public static string Name => Resource.Name;
+
+        public static string Price => Resource.Price;
 
         public static string Product => Resource.Product;
 
         public static string Products => Resource.Products;
 
-        public static string Price => Resource.Price;
+        public static string LastPurchase => Resource.LastPurchase;
+
+        public static string LastSale => Resource.LastSale;
 
         public static string Loading => Resource.Loading;
 
         public static string SearchProduct => Resource.SearchProduct;
+
+        public static string Stock => Resource.Stock;
     }
 }

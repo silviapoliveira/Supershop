@@ -7,7 +7,6 @@ using Supershop.Prism.Services;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Net.Http.Headers;
 using Xamarin.Essentials;
 using Xamarin.Forms;
 
@@ -29,7 +28,7 @@ namespace Supershop.Prism.ViewModels
         {
             _navigationService = navigationService;
             _apiService = apiService;
-            Title = Languages.Product;
+            Title = Languages.Products;
 
             LoadProductsAsync();
         }
@@ -60,7 +59,7 @@ namespace Supershop.Prism.ViewModels
 
         private async void LoadProductsAsync()
         {
-            if(Connectivity.NetworkAccess != NetworkAccess.Internet)
+            if (Connectivity.NetworkAccess != NetworkAccess.Internet)
             {
                 Device.BeginInvokeOnMainThread(async () =>
                 {
@@ -94,7 +93,7 @@ namespace Supershop.Prism.ViewModels
 
         private void ShowProducts()
         {
-            if(string.IsNullOrEmpty(Search))
+            if (string.IsNullOrEmpty(Search))
             {
                 Products = new ObservableCollection<ProductItemViewModel>(_myProducts.Select(p =>
                 new ProductItemViewModel(_navigationService)
@@ -110,7 +109,8 @@ namespace Supershop.Prism.ViewModels
                     User = p.User,
                     ImageFullPath = p.ImageFullPath
                 }).ToList());
-            } else
+            }
+            else
             {
                 Products = new ObservableCollection<ProductItemViewModel>(_myProducts.Select(p =>
                 new ProductItemViewModel(_navigationService)
