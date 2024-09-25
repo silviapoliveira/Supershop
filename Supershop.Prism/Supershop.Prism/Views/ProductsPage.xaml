@@ -35,7 +35,7 @@
                             </Grid.ColumnDefinitions>
                             <ffimageloading:CachedImage
                                 Grid.Column="0"
-                                Aspect="AspectFit"
+                                Aspect="AspectFill"
                                 Source="{Binding ImageFullPath}"
                                 CacheDuration="50"
                                 Margin="5"
